@@ -1,0 +1,190 @@
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', 'Times New Roman', Times, serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 flex justify-center items-center min-h-screen">
+    <div class="bg-gray-300 p-8 rounded-lg shadow-lg w-full max-w-4xl">
+        <h1 class="text-2xl font-bold mb-6">Kasir</h1>
+        <div class="grid grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-lg font-bold mb-4">Menu Coffee</h2>
+                <div id="coffee-menu" class="space-y-4">
+                    <!-- Coffee menu items will be inserted here by JavaScript -->
+                </div>
+                <h2 class="text-lg font-bold mb-4 mt-8">Menu Non-Coffee</h2>
+                <div id="non-coffee-menu" class="space-y-4">
+                    <!-- Non-coffee menu items will be inserted here by JavaScript -->
+                </div>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold mb-4">Struk Pembelian</h2>
+                <div id="receipt" class="bg-white p-4 rounded-lg shadow-inner h-64 overflow-y-auto">
+                    <!-- Receipt items will be inserted here by JavaScript -->
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between font-bold">
+                        <span>Total:</span>
+                        <span id="total-price">0</span>
+                    </div>
+                    <button id="checkout" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const coffeeItems = [
+            { name: 'Caffe Latte', priceHot: 20000, priceIce: 22000, image: 'images/istockphoto-1152767411-612x612.jpg' },
+            { name: 'Cappucino', priceHot: 20000, priceIce: 22000, image: 'images/images.jpeg' },
+            { name: 'Americano', priceHot: 18000, priceIce: 18000, image: 'images/istockphoto-1301137165-612x612.jpg' },
+            { name: 'Ambon', priceHot: 20000, priceIce: 20000, image: 'https://placehold.co/100x100?text=Ambon' },
+            { name: 'Mocca', priceHot: 25000, priceIce: 25000, image: 'images/gettyimages-157675911-612x612.jpg' },
+            { name: 'Vanilla', priceHot: 25000, priceIce: 25000, image: 'images/Vanilla-Glass-New.jpg' },
+            { name: 'Caramel', priceHot: 23000, priceIce: 25000, image: 'images/CARAMEL-MACCHIATO-2.jpg' },
+            { name: 'Almond', priceHot: 23000, priceIce: 25000, image: 'images/018485300_1662431246-shutterstock_1918895903.jpg' },
+            { name: 'Hazelnut', priceHot: 23000, priceIce: 25000, image: 'images/hazelnut.jpg' },
+            { name: 'Avocado', priceHot: 23000, priceIce: 25000, image: 'images/avocado-coffee.jpg' },
+            { name: 'Coconut', priceHot: 25000, priceIce: 25000, image: 'images/kopi-coconut.jpg' },
+            { name: 'Kopasus', priceHot: 25000, priceIce: 25000, image: 'images/kopi-susu-pandan-2.jpg' },
+            { name: 'Kosu', priceHot: 20000, priceIce: 22000, image: 'images/kopi-susu.jpg' },
+            { name: 'Koren', priceHot: 25000, priceIce: 25000, image: 'images/koren.jpg' },
+        ];
+
+        const nonCoffeeItems = [
+            { name: 'Chocolate', priceHot: 23000, priceIce: 25000, image: 'images/chocolate.jpeg' },
+            { name: 'Taro', priceHot: 20000, priceIce: 22000, image: 'images/taro.jpg' },
+            { name: 'Cookies & Cream', priceHot: 22000, priceIce: 22000, image: 'images/cookies.jpg' },
+            { name: 'Banana', priceHot: 20000, priceIce: 20000, image: 'images/banana.jpg' },
+            { name: 'Red Velvet', priceHot: 20000, priceIce: 22000, image: 'images/red.jpg' },
+            { name: 'Lemon Tea', priceHot: 16000, priceIce: 18000, image: 'images/lemon-tea.jpg' },
+            { name: 'Milk Tea', priceHot: 16000, priceIce: 18000, image: 'images/milk-tea.jpg' },
+        ];
+
+        const coffeeMenuContainer = document.getElementById('coffee-menu');
+        const nonCoffeeMenuContainer = document.getElementById('non-coffee-menu');
+        const receiptContainer = document.getElementById('receipt');
+        const totalPriceElement = document.getElementById('total-price');
+        let totalPrice = 0;
+        let receiptItems = [];
+
+        function createMenuItem(item, container) {
+            const menuItem = document.createElement('div');
+            menuItem.classList.add('flex', 'items-center', 'justify-between', 'bg-white', 'p-4', 'rounded-lg', 'shadow-md');
+
+            const itemInfo = document.createElement('div');
+            itemInfo.classList.add('flex', 'items-center');
+
+            const itemImage = document.createElement('img');
+            itemImage.src = item.image;
+            itemImage.alt = item.name;
+            itemImage.classList.add('w-16', 'h-16', 'mr-4', 'rounded-lg');
+
+            const itemName = document.createElement('div');
+            itemName.innerHTML = `<strong>${item.name}</strong><br>Hot: ${item.priceHot.toLocaleString()}, Ice: ${item.priceIce.toLocaleString()}`;
+
+            itemInfo.appendChild(itemImage);
+            itemInfo.appendChild(itemName);
+
+            const itemActions = document.createElement('div');
+            itemActions.classList.add('flex', 'items-center');
+
+            const addButton = document.createElement('button');
+            addButton.innerHTML = '<i class="fas fa-plus"></i>';
+            addButton.classList.add('bg-green-500', 'text-white', 'p-2', 'rounded-lg', 'mr-2');
+            addButton.onclick = () => showHotIceSelection(item);
+
+            itemActions.appendChild(addButton);
+
+            menuItem.appendChild(itemInfo);
+            menuItem.appendChild(itemActions);
+
+            container.appendChild(menuItem);
+        }
+
+        coffeeItems.forEach(item => createMenuItem(item, coffeeMenuContainer));
+        nonCoffeeItems.forEach(item => createMenuItem(item, nonCoffeeMenuContainer));
+
+        function showHotIceSelection(item) {
+            const selection = prompt(`Pilih Hot atau Ice untuk ${item.name} (ketik "h" atau "i"):`).toLowerCase();
+            if (selection === 'h') {
+                addToReceipt(item, 'hot');
+            } else if (selection === 'i') {
+                addToReceipt(item, 'ice');
+            } else {
+                alert('Pilihan tidak valid. Silakan coba lagi.');
+            }
+        }
+
+        function addToReceipt(item, type) {
+            const existingItem = receiptItems.find(receiptItem => receiptItem.name === item.name && receiptItem.type === type);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                receiptItems.push({ ...item, type, quantity: 1 });
+            }
+            updateReceipt();
+        }
+
+        function removeFromReceipt(item) {
+            const existingItem = receiptItems.find(receiptItem => receiptItem.name === item.name && receiptItem.type === item.type);
+            if (existingItem) {
+                existingItem.quantity--;
+                if (existingItem.quantity === 0) {
+                    receiptItems = receiptItems.filter(receiptItem => receiptItem.name !== item.name || receiptItem.type !== item.type);
+                }
+            }
+            updateReceipt();
+        }
+
+        function updateReceipt() {
+            receiptContainer.innerHTML = '';
+            totalPrice = 0;
+
+            receiptItems.forEach(item => {
+                const receiptItem = document.createElement('div');
+                receiptItem.classList.add('flex', 'justify-between', 'mb-2');
+
+                const itemInfo = document.createElement('div');
+                itemInfo.innerHTML = `<strong>${item.name} (${item.type})</strong> x${item.quantity}`;
+
+                const itemActions = document.createElement('div');
+                itemActions.classList.add('flex', 'items-center');
+
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '<i class="fas fa-minus"></i>';
+                removeButton.classList.add('bg-red-500', 'text-white', 'p-2', 'rounded-lg', 'mr-2');
+                removeButton.onclick = () => removeFromReceipt(item);
+
+                const itemPrice = document.createElement('span');
+                const price = item.quantity * (item.type === 'hot' ? item.priceHot : item.priceIce);
+                itemPrice.innerText = price.toLocaleString();
+
+                itemActions.appendChild(removeButton);
+                itemActions.appendChild(itemPrice);
+
+                receiptItem.appendChild(itemInfo);
+                receiptItem.appendChild(itemActions);
+
+                receiptContainer.appendChild(receiptItem);
+
+                totalPrice += price;
+            });
+
+            totalPriceElement.innerText = totalPrice.toLocaleString();
+        }
+
+        document.getElementById('checkout').onclick = () => {
+            alert(`Total Pembelian: ${totalPrice.toLocaleString()}`);
+            receiptItems = [];
+            updateReceipt();
+        };
+    </script>
+</body>
+</html>
