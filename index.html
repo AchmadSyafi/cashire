@@ -7,11 +7,20 @@
         body {
             font-family: 'Roboto', 'Times New Roman', Times, serif;
         }
+        @media print {
+            .receipt-background {
+                background-image: url('https://placehold.co/600x800?text=Receipt+Background');
+                background-size: cover;
+                background-repeat: no-repeat;
+                padding: 20px;
+                border-radius: 10px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-200 flex justify-center items-center min-h-screen">
     <div class="bg-gray-300 p-8 rounded-lg shadow-lg w-full max-w-4xl">
-        <h1 class="text-2xl font-bold mb-6">Kasir</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center">Kasir</h1>
         <div class="grid grid-cols-2 gap-8">
             <div>
                 <h2 class="text-lg font-bold mb-4">Menu Coffee</h2>
@@ -34,8 +43,29 @@
                         <span id="total-price">0</span>
                     </div>
                     <button id="checkout" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Checkout</button>
+                    <button id="print" class="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg w-full">Print</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="order-summary" class="hidden bg-gray-300 p-8 rounded-lg shadow-lg w-full max-w-4xl mt-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Pesanan Anda</h2>
+        <div id="order-details" class="bg-white p-4 rounded-lg shadow-inner h-64 overflow-y-auto">
+            <!-- Order details will be inserted here by JavaScript -->
+        </div>
+        <div class="mt-4">
+            <div class="flex justify-between font-bold">
+                <span>Total:</span>
+                <span id="order-total-price">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-list" class="hidden bg-gray-300 p-8 rounded-lg shadow-lg w-full max-w-4xl mt-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Daftar Pesanan</h2>
+        <div id="order-list-details" class="bg-white p-4 rounded-lg shadow-inner h-64 overflow-y-auto">
+            <!-- Order list details will be inserted here by JavaScript -->
         </div>
     </div>
 
@@ -71,8 +101,12 @@
         const nonCoffeeMenuContainer = document.getElementById('non-coffee-menu');
         const receiptContainer = document.getElementById('receipt');
         const totalPriceElement = document.getElementById('total-price');
+        const orderDetailsContainer = document.getElementById('order-details');
+        const orderTotalPriceElement = document.getElementById('order-total-price');
+        const orderListContainer = document.getElementById('order-list-details');
         let totalPrice = 0;
         let receiptItems = [];
+        let orders = [];
 
         function createMenuItem(item, container) {
             const menuItem = document.createElement('div');
@@ -83,7 +117,7 @@
 
             const itemImage = document.createElement('img');
             itemImage.src = item.image;
-            itemImage.alt = item.name;
+            itemImage.alt = `Image of ${item.name}`;
             itemImage.classList.add('w-16', 'h-16', 'mr-4', 'rounded-lg');
 
             const itemName = document.createElement('div');
@@ -181,10 +215,100 @@
         }
 
         document.getElementById('checkout').onclick = () => {
-            alert(`Total Pembelian: ${totalPrice.toLocaleString()}`);
-            receiptItems = [];
-            updateReceipt();
+            const customerName = prompt("Nama Pemesan:");
+            if (customerName) {
+                alert(`Total Pembelian: ${totalPrice.toLocaleString()}`);
+                orders.push({ name: customerName, items: [...receiptItems], total: totalPrice });
+                updateOrderSummary();
+                updateOrderList();
+                document.getElementById('order-summary').classList.remove('hidden');
+                document.getElementById('order-list').classList.remove('hidden');
+                receiptItems = [];
+                updateReceipt();
+            } else {
+                alert("Nama pemesan tidak boleh kosong.");
+            }
         };
+
+        document.getElementById('print').onclick = () => {
+            const printContent = `
+                <div class="receipt-background">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Daftar Pesanan</h2>
+                    ${orders.map(order => `
+                        <div class="mb-4 p-4 bg-white rounded-lg shadow-md">
+                            <div class="flex justify-between font-bold mb-2">
+                                <span>${order.name}</span>
+                                <span>Total: ${order.total.toLocaleString()}</span>
+                            </div>
+                            ${order.items.map(item => `
+                                <div class="flex justify-between mb-2">
+                                    <span>${item.name} (${item.type}) x${item.quantity}</span>
+                                    <span>${(item.quantity * (item.type === 'hot' ? item.priceHot : item.priceIce)).toLocaleString()}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            const originalContent = document.body.innerHTML;
+
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            window.location.reload();
+        };
+
+        function updateOrderSummary() {
+            orderDetailsContainer.innerHTML = '';
+            let orderTotalPrice = 0;
+
+            receiptItems.forEach(item => {
+                const orderItem = document.createElement('div');
+                orderItem.classList.add('flex', 'justify-between', 'mb-2');
+
+                const itemInfo = document.createElement('div');
+                itemInfo.innerHTML = `<strong>${item.name} (${item.type})</strong> x${item.quantity}`;
+
+                const itemPrice = document.createElement('span');
+                const price = item.quantity * (item.type === 'hot' ? item.priceHot : item.priceIce);
+                itemPrice.innerText = price.toLocaleString();
+
+                orderItem.appendChild(itemInfo);
+                orderItem.appendChild(itemPrice);
+
+                orderDetailsContainer.appendChild(orderItem);
+
+                orderTotalPrice += price;
+            });
+
+            orderTotalPriceElement.innerText = orderTotalPrice.toLocaleString();
+        }
+
+        function updateOrderList() {
+            orderListContainer.innerHTML = '';
+
+            orders.forEach(order => {
+                const orderItem = document.createElement('div');
+                orderItem.classList.add('mb-4', 'p-4', 'bg-white', 'rounded-lg', 'shadow-md');
+
+                const orderHeader = document.createElement('div');
+                orderHeader.classList.add('flex', 'justify-between', 'font-bold', 'mb-2');
+                orderHeader.innerHTML = `<span>${order.name}</span><span>Total: ${order.total.toLocaleString()}</span>`;
+
+                const orderDetails = document.createElement('div');
+                order.items.forEach(item => {
+                    const itemDetail = document.createElement('div');
+                    itemDetail.classList.add('flex', 'justify-between', 'mb-2');
+                    itemDetail.innerHTML = `<span>${item.name} (${item.type}) x${item.quantity}</span><span>${(item.quantity * (item.type === 'hot' ? item.priceHot : item.priceIce)).toLocaleString()}</span>`;
+                    orderDetails.appendChild(itemDetail);
+                });
+
+                orderItem.appendChild(orderHeader);
+                orderItem.appendChild(orderDetails);
+
+                orderListContainer.appendChild(orderItem);
+            });
+        }
     </script>
 </body>
 </html>
