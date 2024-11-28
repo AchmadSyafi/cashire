@@ -2,6 +2,7 @@
 <head>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
         body {
@@ -44,6 +45,7 @@
                     </div>
                     <button id="checkout" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Checkout</button>
                     <button id="print" class="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg w-full">Print</button>
+                    <button id="download" class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg w-full">Download PDF</button>
                 </div>
             </div>
         </div>
@@ -256,6 +258,33 @@
             window.print();
             document.body.innerHTML = originalContent;
             window.location.reload();
+        };
+
+        document.getElementById('download').onclick = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let y = 10;
+            doc.setFontSize(16);
+            doc.text('Daftar Pesanan', 105, y, null, null, 'center');
+            y += 10;
+
+            orders.forEach(order => {
+                doc.setFontSize(12);
+                doc.text(`Atas Nama: ${order.name}`, 10, y);
+                doc.text(`Total: ${order.total.toLocaleString()}`, 150, y);
+                y += 10;
+
+                order.items.forEach(item => {
+                    doc.text(`${item.name} (${item.type}) x${item.quantity}`, 10, y);
+                    doc.text(`${(item.quantity * (item.type === 'hot' ? item.priceHot : item.priceIce)).toLocaleString()}`, 150, y);
+                    y += 10;
+                });
+
+                y += 10;
+            });
+
+            doc.save('receipt.pdf');
         };
 
         function updateOrderSummary() {
