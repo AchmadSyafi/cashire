@@ -32,6 +32,10 @@
                 <div id="non-coffee-menu" class="space-y-4">
                     <!-- Non-coffee menu items will be inserted here by JavaScript -->
                 </div>
+                <h2 class="text-lg font-bold mb-4 mt-8">Menu Snack</h2>
+                <div id="snack-menu" class="space-y-4">
+                    <!-- snack menu items will be inserted here by JavaScript -->
+                </div>
             </div>
             <div>
                 <h2 class="text-lg font-bold mb-4">Struk Pembelian</h2>
@@ -99,8 +103,15 @@
             { name: 'Milk Tea', priceHot: 16000, priceIce: 18000, image: 'images/milk-tea.jpg' },
         ];
 
+        const snackItems = [
+            { name: 'French Fries', priceHot: 23000, priceIce: 25000, image: 'images/kentang.jpg' },
+            { name: 'Roti Bakar', priceHot: 20000, priceIce: 22000, image: 'images/roti bakar.jpg' },
+            { name: 'Mix Platter', priceHot: 22000, priceIce: 22000, image: 'images/mix.jpg' },
+        ];
+
         const coffeeMenuContainer = document.getElementById('coffee-menu');
         const nonCoffeeMenuContainer = document.getElementById('non-coffee-menu');
+        const snackMenuContainer = document.getElementById('snack-menu');
         const receiptContainer = document.getElementById('receipt');
         const totalPriceElement = document.getElementById('total-price');
         const orderDetailsContainer = document.getElementById('order-details');
@@ -146,6 +157,7 @@
 
         coffeeItems.forEach(item => createMenuItem(item, coffeeMenuContainer));
         nonCoffeeItems.forEach(item => createMenuItem(item, nonCoffeeMenuContainer));
+        snackItems.forEach(item => createMenuItem(item, snackMenuContainer));
 
         function showHotIceSelection(item) {
             const selection = prompt(`Pilih Hot atau Ice untuk ${item.name} (ketik "h" atau "i"):`).toLowerCase();
